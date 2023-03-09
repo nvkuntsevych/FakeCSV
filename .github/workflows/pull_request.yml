@@ -1,0 +1,48 @@
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  run_checks:
+    runs-on: ubuntu-latest
+    env:
+      SECRET_KEY: ${{ secrets.SECRET_KEY }}
+      DEBUG: ${{ vars.DEBUG }}
+      ALLOWED_HOSTS: ${{ vars.ALLOWED_HOSTS }}
+      SQL_ENGINE: ${{ vars.SQL_ENGINE }}
+      SQL_DATABASE: ${{ vars.SQL_DATABASE }}
+      SQL_USER: ${{ vars.SQL_USER }}
+      SQL_PASSWORD: ${{ vars.SQL_PASSWORD }}
+      SQL_HOST: ${{ vars.SQL_HOST }}
+      SQL_PORT: ${{ vars.SQL_PORT }}
+      DATABASE: ${{ vars.DATABASE }}
+    services:
+      postgres_db:
+        image: postgres:15.1
+        env:
+          POSTGRES_DB: ${{ vars.SQL_ENGINE }}
+          POSTGRES_USER: ${{ vars.SQL_USER }}
+          POSTGRES_PASSWORD: ${{ vars.SQL_PASSWORD }}
+        ports:
+          - 5432:5432
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      - name: install dependencies
+        run: |
+          python3 -m venv venv
+          . venv/bin/activate
+          pip install -r requirements.txt
+      - name: run django check
+        run: |
+          . venv/bin/activate
+          python backend/manage.py check
+      - name: run linter
+        run: |
+          . venv/bin/activate
+          flake8 --statistics backend
