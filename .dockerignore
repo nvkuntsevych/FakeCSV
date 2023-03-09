@@ -1,0 +1,9 @@
+venv
+Dockerfile
+docker-compose.yaml
+config
+__pycache__
+.git
+.gitignore
+.flake8
+.dockerignore
