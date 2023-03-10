@@ -1,0 +1,12 @@
+{% extends 'schemas/base.html' %}
+
+{% block title %}
+Data schemas
+{% endblock %}
+
+{% block content %}
+    <div>Data schemas</div>
+    {% for obj in object_list %}
+        <p>{{ obj }}</p>
+    {% endfor %}
+{% endblock %}

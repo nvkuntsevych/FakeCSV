@@ -26,6 +26,7 @@ INSTALLED_APPS = [
 
     # local
     'users.apps.UsersConfig',
+    'schemas.apps.SchemasConfig',
 ]
 
 MIDDLEWARE = [
