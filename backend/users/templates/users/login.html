@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <meta charset="utf-8">
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
         <title>Login</title>
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
@@ -27,7 +27,7 @@
         </style>
     </head>
     <body>
-        <div class="login-form">
+        <div class="login-form" action="{% url 'users:login' %}">
             <form method="post">
                 {% csrf_token %}
                 <h2 class="text-center">Login</h2>
