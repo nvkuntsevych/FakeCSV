@@ -1,0 +1,19 @@
+{% extends 'schemas/base.html' %}
+
+{% block title %}
+New schema
+{% endblock %}
+
+{% block content %}
+    <h3>New schema</h3>
+    <form method="post" action="{% url 'schemas:create' %}">
+        {% csrf_token %}
+        <div>{{ form.non_field_errors }}</div>
+        {% for field in form %}
+            <div>{{ field.errors }}</div>
+            <div>{{ field.label }}</div>
+            <div>{{ field }}</div>
+        {% endfor %}
+        <button type="submit">Submit</button>
+    </form>
+{% endblock %}
