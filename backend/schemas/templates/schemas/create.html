@@ -1,44 +1,64 @@
 {% extends 'schemas/base.html' %}
 
 {% block content %}
-  <h1>Create Column</h1>
-  <form id="form-container" method="POST" action="{% url 'schemas:create' %}">
-      {% csrf_token %}
 
-      {{ schema_form.as_p }}
+    <h1>Create Column</h1>
+    <form id="form-container" method="POST" action="{% url 'schemas:create' %}">
+        {% csrf_token %}
 
-      {{column_formset.management_form}}
-      {% for form in column_formset %}
-      <div class="column-form">
-      {{form.as_p}}
-      </div>
-      {% endfor %}
-      <button id="add-form" type="button">Add column</button>
-      <button type="submit">Submit</button>
-  </form>
+        {{ schema_form.as_p }}
+
+        {{column_formset.management_form}}
+        <div id="column-formset">
+            {% for form in column_formset %}
+            <div class="column-form">
+                {{form.as_p}}
+                <button class="delete-form" type="button">Delete column</button>
+            </div>
+            {% endfor %}
+        </div>
+        <button id="add-form" type="button">Add column</button>
+        <button type="submit">Submit</button>
+    </form>    
+
+    <script>
+        let columnFormset = document.querySelector("#column-formset")
+        let addButton = document.querySelector("#add-form")
+        let totalForms = document.querySelector("#id_form-TOTAL_FORMS")
   
+        let formNum = columnFormset.querySelectorAll('.column-form').length
+        addButton.addEventListener('click', addForm)
+        columnFormset.addEventListener('click', deleteForm)
+  
+        function addForm(e){
+            e.preventDefault()
+  
+            let newForm = columnFormset.querySelector('.column-form:first-child').cloneNode(true)
+            let formRegex = RegExp(`form-(\\d){1}-`,'g')
+  
+            formNum++
+            newForm.innerHTML = newForm.innerHTML.replace(formRegex, `form-${formNum}-`)
+            columnFormset.appendChild(newForm)
+            
+            totalForms.setAttribute('value', `${formNum}`)
+        }
+        function deleteForm(e){
+            if (e.target.classList.contains('delete-form')){
+                let formCount = columnFormset.querySelectorAll('.column-form').length
 
-  <script>
-      let columnForm = document.querySelectorAll(".column-form")
-      let container = document.querySelector("#form-container")
-      let addButton = document.querySelector("#add-form")
-      let totalForms = document.querySelector("#id_form-TOTAL_FORMS")
+                if (formCount > 1){
+                    e.target.parentNode.remove()
+                    formNum--
 
-      let formNum = columnForm.length-1
-      addButton.addEventListener('click', addForm)
-
-      function addForm(e){
-          e.preventDefault()
-
-          let newForm = columnForm[0].cloneNode(true)
-          let formRegex = RegExp(`form-(\\d){1}-`,'g')
-
-          formNum++
-          newForm.innerHTML = newForm.innerHTML.replace(formRegex, `form-${formNum}-`)
-          container.insertBefore(newForm, addButton)
-          
-          totalForms.setAttribute('value', `${formNum+1}`)
-      }
+                    let forms = columnFormset.querySelectorAll('.column-form')
+                    forms.forEach((form, index) => {
+                        let formRegex = RegExp(`form-(\\d){1}-`,'g')
+                        form.innerHTML = form.innerHTML.replace(formRegex, `form-${index}-`)
+                    })
+                    
+                    totalForms.setAttribute('value', `${formNum}`)
+                }
+            }
+        }
   </script>
-
 {% endblock %}
