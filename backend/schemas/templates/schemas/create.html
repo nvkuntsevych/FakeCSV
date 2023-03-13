@@ -1,19 +1,44 @@
 {% extends 'schemas/base.html' %}
 
-{% block title %}
-New schema
-{% endblock %}
-
 {% block content %}
-    <h3>New schema</h3>
-    <form method="post" action="{% url 'schemas:create' %}">
-        {% csrf_token %}
-        <div>{{ form.non_field_errors }}</div>
-        {% for field in form %}
-            <div>{{ field.errors }}</div>
-            <div>{{ field.label }}</div>
-            <div>{{ field }}</div>
-        {% endfor %}
-        <button type="submit">Submit</button>
-    </form>
+  <h1>Create Column</h1>
+  <form id="form-container" method="POST" action="{% url 'schemas:create' %}">
+      {% csrf_token %}
+
+      {{ schema_form.as_p }}
+
+      {{column_formset.management_form}}
+      {% for form in column_formset %}
+      <div class="column-form">
+      {{form.as_p}}
+      </div>
+      {% endfor %}
+      <button id="add-form" type="button">Add column</button>
+      <button type="submit">Submit</button>
+  </form>
+  
+
+  <script>
+      let columnForm = document.querySelectorAll(".column-form")
+      let container = document.querySelector("#form-container")
+      let addButton = document.querySelector("#add-form")
+      let totalForms = document.querySelector("#id_form-TOTAL_FORMS")
+
+      let formNum = columnForm.length-1
+      addButton.addEventListener('click', addForm)
+
+      function addForm(e){
+          e.preventDefault()
+
+          let newForm = columnForm[0].cloneNode(true)
+          let formRegex = RegExp(`form-(\\d){1}-`,'g')
+
+          formNum++
+          newForm.innerHTML = newForm.innerHTML.replace(formRegex, `form-${formNum}-`)
+          container.insertBefore(newForm, addButton)
+          
+          totalForms.setAttribute('value', `${formNum+1}`)
+      }
+  </script>
+
 {% endblock %}

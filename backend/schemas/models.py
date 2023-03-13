@@ -10,6 +10,11 @@ STRING_CHARACTER_CHOICES = (
     ('"', 'Double-quote (")'),
     ("'", "Single-quote (')"),
 )
+COLUMN_TYPE_CHOICES = (
+    ("1", "Full name"),
+    ("2", "Email"),
+    ("3", "Phone number"),
+)
 
 
 class Schema(models.Model):
@@ -25,7 +30,7 @@ class Schema(models.Model):
 
 class Column(models.Model):
     name = models.CharField(max_length=50)
-    type = models.CharField(max_length=50)
+    type = models.CharField(max_length=1, choices=COLUMN_TYPE_CHOICES)
     order = models.IntegerField()
     schema = models.ForeignKey(Schema, on_delete=models.CASCADE, related_name='columns')
 
