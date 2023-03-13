@@ -9,8 +9,14 @@ class SchemaForm(forms.ModelForm):
         fields = ('name', 'column_separator', 'string_character')
 
 
-ColumnFormSet = forms.modelformset_factory(
+ColumnCreateFormSet = forms.modelformset_factory(
     Column, 
     fields = ('name', 'type', 'order'),
     extra=1,
+)
+
+ColumnUpdateFormSet = forms.modelformset_factory(
+    Column, 
+    fields = ('name', 'type', 'order'),
+    extra=0,
 )

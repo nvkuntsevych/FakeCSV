@@ -1,0 +1,21 @@
+{% extends 'schemas/base.html' %}
+
+{% block content %}
+
+    <h1>Create Column</h1>
+    <form id="form-container" method="POST">
+        {% csrf_token %}
+
+        {{ schema_form.as_p }}
+
+        {{column_formset.management_form}}
+        <div id="column-formset">
+            {% for form in column_formset %}
+            <div class="column-form">
+                {{form.as_p}}
+            </div>
+            {% endfor %}
+        </div>
+        <button type="submit">Submit</button>
+    </form>
+{% endblock %}

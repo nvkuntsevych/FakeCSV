@@ -7,6 +7,6 @@ Data schemas
 {% block content %}
     <div>Data schemas</div>
     {% for obj in object_list %}
-        <p>{{ obj }}</p>
+        <p>{{ obj }}: {{ obj.id }}</p>
     {% endfor %}
 {% endblock %}
