@@ -14,6 +14,8 @@ COLUMN_TYPE_CHOICES = (
     ("1", "Full name"),
     ("2", "Email"),
     ("3", "Phone number"),
+    ("4", "Address"),
+    ("5", "Date"),
 )
 
 

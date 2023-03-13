@@ -7,6 +7,10 @@ from django.views.generic import ListView, DeleteView
 
 from schemas.forms import SchemaForm, ColumnCreateFormSet, ColumnUpdateFormSet
 from schemas.models import Schema, Column
+from schemas.services import (
+    generate_csv, get_schema_path,
+    get_fieldnames, get_fieldtypes
+)
 
 
 class ListSchemaView(LoginRequiredMixin, ListView):
@@ -62,7 +66,7 @@ class UpdateSchemaView(LoginRequiredMixin, View):
             'column_number': len(column_formset),
         }
         return render(request, 'schemas/update.html', context)
-    
+
     def post(self, request, pk):
         schema = get_object_or_404(Schema, pk=pk)
         schema_form = SchemaForm(request.POST, instance=schema)
@@ -85,3 +89,26 @@ class DeleteSchemaView(LoginRequiredMixin, DeleteView):
     model = Schema
     success_url = reverse_lazy('schemas:list')
     template_name = 'schemas/delete.html'
+
+
+class RetrieveSchemaView(LoginRequiredMixin, View):
+    login_url = reverse_lazy('users:login')
+
+    def get(self, request, pk):
+        schema = get_object_or_404(Schema, pk=pk)
+        context = {
+            'schema': schema,
+        }
+        return render(request, 'schemas/retrieve.html', context)
+
+
+def generate_file_view(request, pk):
+    schema = get_object_or_404(Schema, pk=pk)
+    records_number = int(request.POST['records_number'])
+    schema_path = get_schema_path(schema.user.username, schema.name)
+    column_separator = schema.column_separator
+    string_character = schema.string_character
+    fieldnames = get_fieldnames(schema)
+    fieldtypes = get_fieldtypes(schema)
+    generate_csv(records_number, schema_path, column_separator, string_character, fieldnames, fieldtypes)
+    return render(request, 'schemas/list.html')

@@ -27,8 +27,8 @@
         </style>
     </head>
     <body>
-        <div class="login-form" action="{% url 'users:login' %}">
-            <form method="post">
+        <div class="login-form">
+            <form method="POST" action="{% url 'users:login' %}">
                 {% csrf_token %}
                 <h2 class="text-center">Login</h2>
                 <div>{{ form.non_field_errors }}</div>

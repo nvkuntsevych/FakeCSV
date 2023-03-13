@@ -5,7 +5,7 @@ New schema
 {% endblock %}
 
 {% block content %}
-    <h3>New Schema</h3>
+    <h3>New schema</h3>
     <form id="form-container" method="POST" action="{% url 'schemas:create' %}">
         {% csrf_token %}
         {{ schema_form.as_p }}

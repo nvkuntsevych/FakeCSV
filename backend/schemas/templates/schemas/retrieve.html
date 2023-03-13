@@ -1,0 +1,20 @@
+{% extends 'schemas/base.html' %}
+
+{% block title %}
+Data sets
+{% endblock %}
+
+{% block content %}
+    <h3>Sample schema</h3>
+
+    {% for column in schema.columns.all %}
+    <div>{{ column }}</div>
+    {% endfor %}
+
+    <form method="POST" action="{% url 'schemas:generate' schema.id %}">
+        {% csrf_token %}
+        <input name="records_number" type="text">
+        <button type="submit">Generate</button>
+    </form>
+
+{% endblock %}
