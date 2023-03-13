@@ -1,13 +1,16 @@
 {% extends 'schemas/base.html' %}
 
-{% block content %}
+{% block title %}
+New schema
+{% endblock %}
 
-    <h1>Create Column</h1>
+{% block content %}
+    <h3>New Schema</h3>
     <form id="form-container" method="POST" action="{% url 'schemas:create' %}">
         {% csrf_token %}
-
         {{ schema_form.as_p }}
 
+        <h3>Schema columns</h3>
         {{column_formset.management_form}}
         <div id="column-formset">
             {% for form in column_formset %}

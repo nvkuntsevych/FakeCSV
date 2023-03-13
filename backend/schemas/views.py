@@ -3,7 +3,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse, reverse_lazy
 from django.views import View
-from django.views.generic import ListView
+from django.views.generic import ListView, DeleteView
 
 from schemas.forms import SchemaForm, ColumnCreateFormSet, ColumnUpdateFormSet
 from schemas.models import Schema, Column
@@ -52,20 +52,21 @@ class CreateSchemaView(LoginRequiredMixin, View):
 class UpdateSchemaView(LoginRequiredMixin, View):
     login_url = reverse_lazy('users:login')
 
-    def get(self, request, id):
-        schema = get_object_or_404(Schema, id=id)
+    def get(self, request, pk):
+        schema = get_object_or_404(Schema, pk=pk)
         schema_form = SchemaForm(instance=schema)
-        column_formset = ColumnUpdateFormSet(queryset=Column.objects.filter(schema_id=id))
+        column_formset = ColumnUpdateFormSet(queryset=Column.objects.filter(schema_id=pk))
         context = {
             'schema_form': schema_form,
             'column_formset': column_formset,
+            'column_number': len(column_formset),
         }
         return render(request, 'schemas/update.html', context)
     
-    def post(self, request, id):
-        schema = get_object_or_404(Schema, id=id)
+    def post(self, request, pk):
+        schema = get_object_or_404(Schema, pk=pk)
         schema_form = SchemaForm(request.POST, instance=schema)
-        column_formset = ColumnUpdateFormSet(request.POST, queryset=Column.objects.filter(schema_id=id))
+        column_formset = ColumnUpdateFormSet(request.POST, queryset=Column.objects.filter(schema_id=pk))
         if schema_form.is_valid() and column_formset.is_valid():
             schema_form.save()
             for column_form in column_formset:
@@ -74,5 +75,13 @@ class UpdateSchemaView(LoginRequiredMixin, View):
         context = {
             'schema_form': schema_form,
             'column_formset': column_formset,
+            'column_number': len(column_formset),
         }
         return render(request, 'schemas/update.html', context)
+
+
+class DeleteSchemaView(LoginRequiredMixin, DeleteView):
+    login_url = reverse_lazy('users:login')
+    model = Schema
+    success_url = reverse_lazy('schemas:list')
+    template_name = 'schemas/delete.html'

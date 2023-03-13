@@ -1,12 +1,18 @@
 {% extends 'schemas/base.html' %}
 
-{% block content %}
+{% block title %}
+Update schema
+{% endblock %}
 
-    <h1>Create Column</h1>
+{% block content %}
+    <h3>Update Schema</h3>
     <form id="form-container" method="POST">
         {% csrf_token %}
-
         {{ schema_form.as_p }}
+
+        {% if column_number != 0 %}
+        <h3>Schema columns</h3>
+        {% endif %}
 
         {{column_formset.management_form}}
         <div id="column-formset">
