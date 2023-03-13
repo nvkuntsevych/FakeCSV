@@ -17,4 +17,11 @@ Data sets
         <button type="submit">Generate</button>
     </form>
 
+    {% for dataset in datasets %}
+        {{ dataset.path }}
+        {{ dataset.created }}
+        {{ dataset.status }}
+        <br>
+    {% endfor %}
+
 {% endblock %}

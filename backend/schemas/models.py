@@ -38,3 +38,10 @@ class Column(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class DataSet(models.Model):
+    path = models.FilePathField()
+    created = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=10)
+    schema = models.ForeignKey(Schema, on_delete=models.CASCADE, related_name='datasets')

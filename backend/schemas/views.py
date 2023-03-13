@@ -6,7 +6,7 @@ from django.views import View
 from django.views.generic import ListView, DeleteView
 
 from schemas.forms import SchemaForm, ColumnCreateFormSet, ColumnUpdateFormSet
-from schemas.models import Schema, Column
+from schemas.models import Schema, Column, DataSet
 from schemas.services import (
     generate_csv, get_schema_path,
     get_fieldnames, get_fieldtypes
@@ -98,6 +98,7 @@ class RetrieveSchemaView(LoginRequiredMixin, View):
         schema = get_object_or_404(Schema, pk=pk)
         context = {
             'schema': schema,
+            'datasets': schema.datasets.all()
         }
         return render(request, 'schemas/retrieve.html', context)
 
@@ -110,5 +111,14 @@ def generate_file_view(request, pk):
     string_character = schema.string_character
     fieldnames = get_fieldnames(schema)
     fieldtypes = get_fieldtypes(schema)
+
+    dataset = DataSet.objects.create(schema=schema, status="Processing", path=schema_path)
+
     generate_csv(records_number, schema_path, column_separator, string_character, fieldnames, fieldtypes)
-    return render(request, 'schemas/list.html')
+    dataset.status="Ready"
+    dataset.save()
+    context = {
+        'schema': schema,
+        'datasets': schema.datasets.all()
+    }
+    return render(request, 'schemas/retrieve.html', context)
