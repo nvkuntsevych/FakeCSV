@@ -142,8 +142,8 @@ def generate_file_view(request, pk):
         status="Processing",
         path=dataset_path
     )
-    task.delay(records_number, dataset_path, column_separator,
-               string_character, fieldnames, fieldtypes, dataset.id)
+    task(records_number, dataset_path, column_separator,
+         string_character, fieldnames, fieldtypes, dataset.id)
     return HttpResponseRedirect(reverse('schemas:retrieve', args={schema.id}))
 
 
