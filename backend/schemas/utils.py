@@ -10,6 +10,7 @@ __all__ = ['generate_csv', 'get_row', 'escape',
 import csv
 import os
 
+from django.core.exceptions import PermissionDenied
 from faker import Faker
 
 from base.settings import MEDIA_ROOT
@@ -89,3 +90,13 @@ def get_fieldtypes(schema):
     columns = schema.columns.values('type', 'order')
     sorted_columns = sorted(columns, key=lambda col: col['order'])
     return [column['type'] for column in sorted_columns]
+
+
+def is_owner(user, obj):
+    """Check if the given user owns the given obj.
+
+    If user does not own the obj, raises the exceprions
+    in order to return HTTP 403 Forbidden to user.
+    """
+    if user != obj.user:
+        raise PermissionDenied()

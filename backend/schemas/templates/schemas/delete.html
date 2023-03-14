@@ -5,10 +5,12 @@ Delete schema
 {% endblock %}
 
 {% block content %}
-    <h3>Delete schema</h3>
-    <form method="post">{% csrf_token %}
-        <p>Are you sure you want to delete "{{ object }}"?</p>
-        {{ form }}
-        <input type="submit" value="Confirm">
-    </form>
+    <div style="margin: 30px 60px 100px">
+        <h3>Delete schema</h3>
+        <form method="post">{% csrf_token %}
+            <p>Are you sure you want to delete "{{ object }}"?</p>
+            {{ form }}
+            <input type="submit" value="Confirm">
+        </form>
+    </div>
 {% endblock %}

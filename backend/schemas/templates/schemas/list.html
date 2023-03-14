@@ -5,8 +5,40 @@ Data schemas
 {% endblock %}
 
 {% block content %}
-    <h3>Data schemas</h3>
-    {% for obj in object_list %}
-        <p>{{ obj }}: {{ obj.id }}</p>
-    {% endfor %}
+    <div style="margin: 30px 60px 100px; width: 80%"">
+        <div class="row">
+            <div class="col">
+                <h3>Data schemas</h3>
+            </div>
+            <div class="col">
+                <a href="{% url 'schemas:create' %}" class="btn btn-success float-right">New schema</a>
+            </div>
+        </div>
+
+        <table class="mt-3 table table-bordered table-hover">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Title</th>
+                    <th>Modified</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for schema in schema_list %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>
+                        <a href="{% url 'schemas:retrieve' schema.id %}">{{ schema.name }}</a>
+                    </td>
+                    <td>{{ schema.modified|date:"Y-m-d" }}</td>
+                    <td>
+                        <a href="{% url 'schemas:update' schema.id %}">Edit schema</a>
+                        <a href="{% url 'schemas:delete' schema.id %}" class="text-danger">Delete</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 {% endblock %}

@@ -11,7 +11,11 @@ class LoginUserView(LoginView):
     template_name = 'users/login.html'
 
     def get_success_url(self):
-        return reverse('schemas:list')
+        next_url = self.request.GET.get('next')
+        if next_url:
+            return next_url
+        else:
+            return reverse('schemas:list')
 
 
 def logout_user(request):

@@ -5,22 +5,41 @@ New schema
 {% endblock %}
 
 {% block content %}
-    <form id="form-container" method="POST" action="{% url 'schemas:create' %}">
-        {% csrf_token %}
+    <div style="margin: 30px 60px 100px">
+        <form id="form-container" method="POST" action="{% url 'schemas:create' %}">
+            {% csrf_token %}
 
-        <h3>New schema</h3>
-        {{ schema_form.as_p }}
+            <div class="row">
+                <div class="col">
+                    <h3>New schema</h3>
+                </div>
+                <div class="col">
+                    <button class="btn btn-primary" type="submit">Submit</button>
+                </div>
+            </div>
 
-        <h3>Schema column</h3>
-        {{ column_formset.management_form }}
-        {% for form in column_formset %}
-        <div class="column-form">
-        {{form.as_p}}
-        </div>
-        {% endfor %}
-        <button id="add-form" type="button">Add column</button>
-        <button type="submit">Submit</button>
-    </form>
+            {% for field in schema_form %}
+                <div>{{ field.errors }}</div>
+                <div>{{ field.label }}</div>
+                <div style="margin: 0 0 20px 0">{{ field }}</div>
+            {% endfor %}
+
+            <h3>Schema column</h3>
+            {{ column_formset.management_form }}
+            {% for column_form in column_formset %}
+                <div class="column-form form-row">
+                {% for field in column_form %}
+                    <div>{{ field.errors }}</div>
+                    {% if field.label != 'Id' %}
+                        <div style="margin: 0 10px 15px 0">{{ field.label }}</div>
+                    {% endif %}
+                    <div style="margin: 0 20px 15px 0">{{ field }}</div>
+                {% endfor %}
+                </div>
+            {% endfor %}
+            <button class="btn btn-primary" id="add-form" type="button">Add column</button>
+        </form>
+    </div>
 
     <script>
         let columnForm = document.querySelectorAll(".column-form")
