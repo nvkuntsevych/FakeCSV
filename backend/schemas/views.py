@@ -2,8 +2,9 @@ import os
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import (
-    HttpResponseRedirect, HttpResponseForbidden, 
-    FileResponse, Http404
+    HttpResponseRedirect, HttpResponseForbidden,
+    HttpResponseNotFound, HttpResponseServerError,
+    HttpResponseBadRequest, FileResponse, Http404
 )
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse, reverse_lazy
@@ -14,7 +15,7 @@ from schemas.forms import SchemaForm, ColumnCreateFormSet, ColumnUpdateFormSet
 from schemas.models import Schema, Column, DataSet
 from schemas.tasks import task
 from schemas.utils import (
-    get_dataset_path, get_fieldnames, 
+    get_dataset_path, get_fieldnames,
     get_fieldtypes, is_owner
 )
 
@@ -158,3 +159,19 @@ def download_file_view(request, pk):
             )
             return response
     raise Http404
+
+
+def handler400(request, exception=None):
+    return HttpResponseBadRequest(render(request, 'schemas/errors/400.html'))
+
+
+def handler403(request, exception):
+    return HttpResponseForbidden(render(request, 'schemas/errors/403.html'))
+
+
+def handler404(request, exception):
+    return HttpResponseNotFound(render(request, 'schemas/errors/404.html'))
+
+
+def handler500(request, exception=None):
+    return HttpResponseServerError(render(request, 'schemas/errors/500.html'))

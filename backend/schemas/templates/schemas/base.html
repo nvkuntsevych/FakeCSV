@@ -24,8 +24,10 @@
             <a class="nav-item nav-link active text-dark" href="{% url 'schemas:list' %}" style="margin: 0 0 0 50px">Schemas</a>
           </div>
           <div class="navbar-nav ml-auto">
-            <span class="navbar-text text-dark" style="margin: 0 30px 0 0">Hello, {{ user.username }}</span>
-            <a class="nav-item nav-link active text-dark" href="{% url 'users:logout' %}" style="margin: 0 30px 0 0">Logout</a>
+            {% if user.is_authenticated %}
+              <span class="navbar-text text-dark" style="margin: 0 30px 0 0">Hello, {{ user.username }}</span>
+              <a class="nav-item nav-link active text-dark" href="{% url 'users:logout' %}" style="margin: 0 30px 0 0">Logout</a>
+            {% endif %}
           </div>
         </div>
     </nav>
