@@ -17,6 +17,7 @@ COLUMN_TYPE_CHOICES = (
     ("4", "Address"),
     ("5", "Date"),
 )
+COLUMN_TYPE_DICT = dict(COLUMN_TYPE_CHOICES)
 
 
 class Schema(models.Model):
@@ -42,6 +43,9 @@ class Column(models.Model):
 
     def __str__(self):
         return self.name
+
+    def get_type_name(self):
+        return COLUMN_TYPE_DICT[self.type]
 
 
 class DataSet(models.Model):

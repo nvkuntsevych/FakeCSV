@@ -29,7 +29,7 @@ Data sets
                     <tr>
                         <td>{{ forloop.counter }}</td>
                         <td>{{ column.name }}</td>
-                        <td>{{ column.type }}</td>
+                        <td>{{ column.get_type_name }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
