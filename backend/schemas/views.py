@@ -7,10 +7,8 @@ from django.views.generic import ListView, DeleteView
 
 from schemas.forms import SchemaForm, ColumnCreateFormSet, ColumnUpdateFormSet
 from schemas.models import Schema, Column, DataSet
-from schemas.services import (
-    generate_csv, get_schema_path,
-    get_fieldnames, get_fieldtypes
-)
+from schemas.utills import get_schema_path, get_fieldnames, get_fieldtypes
+from schemas.tasks import task
 
 
 class ListSchemaView(LoginRequiredMixin, ListView):
@@ -105,20 +103,25 @@ class RetrieveSchemaView(LoginRequiredMixin, View):
 
 def generate_file_view(request, pk):
     schema = get_object_or_404(Schema, pk=pk)
+
+    dataset_sequence_number = DataSet.get_next_sequence_number(schema.id)
+    dataset = DataSet.objects.create(
+        schema=schema,
+        status="Processing",
+        sequence_number=dataset_sequence_number
+    )
+
     records_number = int(request.POST['records_number'])
-    schema_path = get_schema_path(schema.user.username, schema.name)
+    schema_path = get_schema_path(schema.user.username, schema.name, dataset_sequence_number)
     column_separator = schema.column_separator
     string_character = schema.string_character
     fieldnames = get_fieldnames(schema)
     fieldtypes = get_fieldtypes(schema)
 
-    dataset = DataSet.objects.create(schema=schema, status="Processing", path=schema_path)
-
-    generate_csv(records_number, schema_path, column_separator, string_character, fieldnames, fieldtypes)
-    dataset.status="Ready"
+    dataset.path = schema_path
     dataset.save()
-    context = {
-        'schema': schema,
-        'datasets': schema.datasets.all()
-    }
-    return render(request, 'schemas/retrieve.html', context)
+
+    task.delay(records_number, schema_path, column_separator,
+               string_character, fieldnames, fieldtypes, dataset.id)
+
+    return HttpResponseRedirect(reverse('schemas:retrieve', args={schema.id}))

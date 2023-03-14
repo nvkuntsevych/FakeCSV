@@ -37,11 +37,11 @@ def escape(string):
     return string.replace('\n', '\\n')
 
 
-def get_schema_path(username, schema_name):
+def get_schema_path(username, schema_name, dataset_number):
     parent_path = os.path.join(MEDIA_ROOT, username)
     if not os.path.isdir(parent_path):
         os.makedirs(parent_path)
-    return os.path.join(parent_path, f"{schema_name}.csv")
+    return os.path.join(parent_path, f"{schema_name}_dataset{dataset_number}.csv")
 
 
 def get_fieldnames(schema):

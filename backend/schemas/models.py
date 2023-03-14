@@ -44,4 +44,9 @@ class DataSet(models.Model):
     path = models.FilePathField()
     created = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=10)
+    sequence_number = models.IntegerField()
     schema = models.ForeignKey(Schema, on_delete=models.CASCADE, related_name='datasets')
+
+    @classmethod
+    def get_next_sequence_number(cls, schema_id):
+        return cls.objects.filter(schema_id=schema_id).count()
