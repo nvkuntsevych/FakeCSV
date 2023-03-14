@@ -1,7 +1,10 @@
 import os
 
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import HttpResponseRedirect, FileResponse, Http404
+from django.http import (
+    HttpResponseRedirect, HttpResponseForbidden, 
+    FileResponse, Http404
+)
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse, reverse_lazy
 from django.views import View
@@ -10,7 +13,10 @@ from django.views.generic import ListView, DeleteView
 from schemas.forms import SchemaForm, ColumnCreateFormSet, ColumnUpdateFormSet
 from schemas.models import Schema, Column, DataSet
 from schemas.tasks import task
-from schemas.utils import get_dataset_path, get_fieldnames, get_fieldtypes
+from schemas.utils import (
+    get_dataset_path, get_fieldnames, 
+    get_fieldtypes, is_owner
+)
 
 
 class ListSchemaView(LoginRequiredMixin, ListView):
@@ -58,6 +64,7 @@ class UpdateSchemaView(LoginRequiredMixin, View):
 
     def get(self, request, pk):
         schema = get_object_or_404(Schema, pk=pk)
+        is_owner(request.user, schema)
         schema_form = SchemaForm(instance=schema)
         column_formset = ColumnUpdateFormSet(
             queryset=Column.objects.filter(schema_id=pk)
@@ -70,6 +77,7 @@ class UpdateSchemaView(LoginRequiredMixin, View):
 
     def post(self, request, pk):
         schema = get_object_or_404(Schema, pk=pk)
+        is_owner(request.user, schema)
         schema_form = SchemaForm(request.POST, instance=schema)
         column_formset = ColumnUpdateFormSet(
             request.POST,
@@ -93,12 +101,18 @@ class DeleteSchemaView(LoginRequiredMixin, DeleteView):
     success_url = reverse_lazy('schemas:list')
     template_name = 'schemas/delete.html'
 
+    def get(self, request, pk):
+        schema = get_object_or_404(Schema, pk=pk)
+        is_owner(request.user, schema)
+        return super().get(request, pk)
+
 
 class RetrieveSchemaView(LoginRequiredMixin, View):
     login_url = reverse_lazy('users:login')
 
     def get(self, request, pk):
         schema = get_object_or_404(Schema, pk=pk)
+        is_owner(request.user, schema)
         context = {
             'schema': schema,
             'column_list': schema.columns.all(),
@@ -109,6 +123,7 @@ class RetrieveSchemaView(LoginRequiredMixin, View):
 
 def generate_file_view(request, pk):
     schema = get_object_or_404(Schema, pk=pk)
+    is_owner(request.user, schema)
     dataset_sequence_number = DataSet.get_next_sequence_number(schema.id)
     records_number = int(request.POST['records_number'])
     dataset_path = get_dataset_path(
@@ -133,6 +148,7 @@ def generate_file_view(request, pk):
 
 def download_file_view(request, pk):
     dataset = get_object_or_404(DataSet, pk=pk)
+    is_owner(request.user, dataset)
     dataset_path = dataset.path
     if os.path.exists(dataset_path):
         with open(dataset_path, 'r') as dataset_file:
