@@ -64,8 +64,7 @@ class UpdateSchemaView(LoginRequiredMixin, View):
         )
         context = {
             'schema_form': schema_form,
-            'column_formset': column_formset,
-            'column_number': len(column_formset),
+            'column_formset': column_formset
         }
         return render(request, 'schemas/update.html', context)
 
@@ -83,8 +82,7 @@ class UpdateSchemaView(LoginRequiredMixin, View):
             return HttpResponseRedirect(reverse('schemas:list'))
         context = {
             'schema_form': schema_form,
-            'column_formset': column_formset,
-            'column_number': len(column_formset),
+            'column_formset': column_formset
         }
         return render(request, 'schemas/update.html', context)
 
@@ -103,22 +101,15 @@ class RetrieveSchemaView(LoginRequiredMixin, View):
         schema = get_object_or_404(Schema, pk=pk)
         context = {
             'schema': schema,
-            'columns': schema.columns.all(),
-            'datasets': schema.datasets.order_by('created')
+            'column_list': schema.columns.all(),
+            'dataset_list': schema.datasets.order_by('created')
         }
         return render(request, 'schemas/retrieve.html', context)
 
 
 def generate_file_view(request, pk):
     schema = get_object_or_404(Schema, pk=pk)
-
     dataset_sequence_number = DataSet.get_next_sequence_number(schema.id)
-    dataset = DataSet.objects.create(
-        schema=schema,
-        status="Processing",
-        sequence_number=dataset_sequence_number
-    )
-
     records_number = int(request.POST['records_number'])
     dataset_path = get_dataset_path(
         schema.user.username,
@@ -130,9 +121,11 @@ def generate_file_view(request, pk):
     fieldnames = get_fieldnames(schema)
     fieldtypes = get_fieldtypes(schema)
 
-    dataset.path = dataset_path
-    dataset.save()
-
+    dataset = DataSet.objects.create(
+        schema=schema,
+        status="Processing",
+        path=dataset_path
+    )
     task.delay(records_number, dataset_path, column_separator,
                string_character, fieldnames, fieldtypes, dataset.id)
     return HttpResponseRedirect(reverse('schemas:retrieve', args={schema.id}))
@@ -140,18 +133,12 @@ def generate_file_view(request, pk):
 
 def download_file_view(request, pk):
     dataset = get_object_or_404(DataSet, pk=pk)
-    schema = dataset.schema
-    dataset_sequence_number = dataset.sequence_number
-    file_path = get_dataset_path(
-        schema.user.username,
-        schema.name,
-        dataset_sequence_number
-    )
-    if os.path.exists(file_path):
-        with open(file_path, 'r') as fh:
-            response = FileResponse(fh.read(), as_attachment=True)
+    dataset_path = dataset.path
+    if os.path.exists(dataset_path):
+        with open(dataset_path, 'r') as dataset_file:
+            response = FileResponse(dataset_file.read(), as_attachment=True)
             response['Content-Disposition'] = (
-                'attachment; filename=' + os.path.basename(file_path)
+                'attachment; filename=' + os.path.basename(dataset_path)
             )
             return response
     raise Http404
