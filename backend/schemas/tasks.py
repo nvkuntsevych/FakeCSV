@@ -1,7 +1,7 @@
 from celery import shared_task
 
 from schemas.models import DataSet
-from schemas.utills import generate_csv
+from schemas.utils import generate_csv
 
 
 @shared_task

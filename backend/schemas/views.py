@@ -7,7 +7,7 @@ from django.views.generic import ListView, DeleteView
 
 from schemas.forms import SchemaForm, ColumnCreateFormSet, ColumnUpdateFormSet
 from schemas.models import Schema, Column, DataSet
-from schemas.utills import get_schema_path, get_fieldnames, get_fieldtypes
+from schemas.utils import get_schema_path, get_fieldnames, get_fieldtypes
 from schemas.tasks import task
 
 
@@ -126,3 +126,20 @@ def generate_file_view(request, pk):
                string_character, fieldnames, fieldtypes, dataset.id)
 
     return HttpResponseRedirect(reverse('schemas:retrieve', args={schema.id}))
+
+
+
+def download_file_view(request, pk):
+    from django.http import FileResponse, Http404
+    import os
+
+    dataset = get_object_or_404(DataSet, pk=pk)
+    schema = dataset.schema
+    dataset_sequence_number = dataset.sequence_number
+    file_path = get_schema_path(schema.user.username, schema.name, dataset_sequence_number)
+    if os.path.exists(file_path):
+        with open(file_path, 'r') as fh:
+            response = FileResponse(fh.read(), as_attachment=True)
+            response['Content-Disposition'] = 'attachment; filename=' + os.path.basename(file_path)
+            return response
+    raise Http404
