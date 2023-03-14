@@ -16,6 +16,15 @@ services:
       - postgres_data:/var/lib/postgresql/data/
     env_file:
       - ./config/.env.dev.db
+  redis:
+    image: redis
+  worker:
+    build: .
+    volumes:
+      - ./backend/:/usr/src/backend/
+    env_file:
+      - ./config/.env.dev
+    command: celery --workdir=./backend -A base worker -l INFO
 
 volumes:
   postgres_data:

@@ -1,0 +1,64 @@
+{% extends 'schemas/base.html' %}
+
+{% block title %}
+Data sets
+{% endblock %}
+
+{% block content %}
+    <h3>Sample schema</h3>
+
+    {% for column in columns %}
+    <div>{{ column }}</div>
+    {% endfor %}
+
+    <!--AJAX-requests-->
+    <form method="POST" id="generate-form" action="{% url 'schemas:generate' schema.id %}">
+        {% csrf_token %}
+        <input name="records_number" type="text">
+        <button type="submit" id="generate-button">Generate</button>
+    </form>
+    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $("#generate-form").submit(function(event) {
+                event.preventDefault();
+                var form = $(this);
+                var url = form.attr("action");
+                var formData = form.serialize();
+    
+                $.ajax({
+                    url: url,
+                    type: 'POST',
+                    data: formData,
+                    success: function(response) {
+                        $('input[name="records_number"]').val('');
+                    },
+                    error: function(xhr, status, error) {
+                    }
+                });
+            });
+        });
+    </script>     
+    <!---->
+
+    <!--page-reloading-->
+    <script>  
+        $(document).ready(function() {
+            setInterval(function() {
+            }, 30000);
+        });
+    </script>
+    <!---->
+
+    {% for dataset in datasets %}
+        {{ dataset.sequence_number }}
+        {{ dataset.created.date }}
+        {{ dataset.status }}
+        {% if dataset.status == "Ready" %}
+            <a href="{% url 'schemas:download' dataset.id %}">Download file</a>
+        {% endif %}
+        <br>
+    {% endfor %}
+
+{% endblock %}

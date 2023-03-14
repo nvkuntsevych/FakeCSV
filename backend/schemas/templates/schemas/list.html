@@ -1,0 +1,12 @@
+{% extends 'schemas/base.html' %}
+
+{% block title %}
+Data schemas
+{% endblock %}
+
+{% block content %}
+    <h3>Data schemas</h3>
+    {% for obj in object_list %}
+        <p>{{ obj }}: {{ obj.id }}</p>
+    {% endfor %}
+{% endblock %}
