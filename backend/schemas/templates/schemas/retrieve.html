@@ -7,15 +7,40 @@ Data sets
 {% block content %}
     <h3>Sample schema</h3>
 
-    {% for column in schema.columns.all %}
+    {% for column in columns %}
     <div>{{ column }}</div>
     {% endfor %}
 
-    <form method="POST" action="{% url 'schemas:generate' schema.id %}">
+    <!--AJAX-requests------------------------->
+    <form method="POST" id="generate-form" action="{% url 'schemas:generate' schema.id %}">
         {% csrf_token %}
         <input name="records_number" type="text">
-        <button type="submit">Generate</button>
+        <button type="submit" id="generate-button">Generate</button>
     </form>
+    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $("#generate-form").submit(function(event) {
+                event.preventDefault();
+                var form = $(this);
+                var url = form.attr("action");
+                var formData = form.serialize();
+    
+                $.ajax({
+                    url: url,
+                    type: 'POST',
+                    data: formData,
+                    success: function(response) {
+                        $('input[name="records_number"]').val('');
+                    },
+                    error: function(xhr, status, error) {
+                    }
+                });
+            });
+        });
+    </script>     
+    <!--------------------------->
 
     {% for dataset in datasets %}
         {{ dataset.path }}

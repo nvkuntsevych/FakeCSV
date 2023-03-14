@@ -96,7 +96,8 @@ class RetrieveSchemaView(LoginRequiredMixin, View):
         schema = get_object_or_404(Schema, pk=pk)
         context = {
             'schema': schema,
-            'datasets': schema.datasets.all()
+            'columns': schema.columns.all(),
+            'datasets': schema.datasets.order_by('created')
         }
         return render(request, 'schemas/retrieve.html', context)
 
