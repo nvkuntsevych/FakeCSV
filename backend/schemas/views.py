@@ -149,7 +149,7 @@ def generate_file_view(request, pk):
 
 def download_file_view(request, pk):
     dataset = get_object_or_404(DataSet, pk=pk)
-    is_owner(request.user, dataset)
+    is_owner(request.user, dataset.schema)
     dataset_path = dataset.path
     if os.path.exists(dataset_path):
         with open(dataset_path, 'r') as dataset_file:
