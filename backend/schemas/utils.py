@@ -55,6 +55,7 @@ def escape(string):
 def get_dataset_path(username, schema_name, dataset_number):
     """Return path to the dataset.
 
+    Creates non-existent directories in the path.
     The path is formed according to the following pattern:
     <MEDIA_ROOT>/<username>/<schema_name>_<datasetN>.csv
     N - sequence number of dataset.
@@ -64,7 +65,10 @@ def get_dataset_path(username, schema_name, dataset_number):
     parent_path = os.path.join(MEDIA_ROOT, username)
     if not os.path.isdir(parent_path):
         os.makedirs(parent_path)
-    return os.path.join(parent_path, f"{schema_name}_dataset{dataset_number}.csv")
+    return os.path.join(
+        parent_path,
+        f"{schema_name}_dataset{dataset_number}.csv"
+    )
 
 
 def get_fieldnames(schema):

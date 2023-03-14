@@ -1,5 +1,7 @@
+import os
+
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, FileResponse, Http404
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse, reverse_lazy
 from django.views import View
@@ -7,8 +9,8 @@ from django.views.generic import ListView, DeleteView
 
 from schemas.forms import SchemaForm, ColumnCreateFormSet, ColumnUpdateFormSet
 from schemas.models import Schema, Column, DataSet
-from schemas.utils import get_dataset_path, get_fieldnames, get_fieldtypes
 from schemas.tasks import task
+from schemas.utils import get_dataset_path, get_fieldnames, get_fieldtypes
 
 
 class ListSchemaView(LoginRequiredMixin, ListView):
@@ -57,7 +59,9 @@ class UpdateSchemaView(LoginRequiredMixin, View):
     def get(self, request, pk):
         schema = get_object_or_404(Schema, pk=pk)
         schema_form = SchemaForm(instance=schema)
-        column_formset = ColumnUpdateFormSet(queryset=Column.objects.filter(schema_id=pk))
+        column_formset = ColumnUpdateFormSet(
+            queryset=Column.objects.filter(schema_id=pk)
+        )
         context = {
             'schema_form': schema_form,
             'column_formset': column_formset,
@@ -68,7 +72,10 @@ class UpdateSchemaView(LoginRequiredMixin, View):
     def post(self, request, pk):
         schema = get_object_or_404(Schema, pk=pk)
         schema_form = SchemaForm(request.POST, instance=schema)
-        column_formset = ColumnUpdateFormSet(request.POST, queryset=Column.objects.filter(schema_id=pk))
+        column_formset = ColumnUpdateFormSet(
+            request.POST,
+            queryset=Column.objects.filter(schema_id=pk)
+        )
         if schema_form.is_valid() and column_formset.is_valid():
             schema_form.save()
             for column_form in column_formset:
@@ -113,7 +120,11 @@ def generate_file_view(request, pk):
     )
 
     records_number = int(request.POST['records_number'])
-    dataset_path = get_dataset_path(schema.user.username, schema.name, dataset_sequence_number)
+    dataset_path = get_dataset_path(
+        schema.user.username,
+        schema.name,
+        dataset_sequence_number
+    )
     column_separator = schema.column_separator
     string_character = schema.string_character
     fieldnames = get_fieldnames(schema)
@@ -124,21 +135,23 @@ def generate_file_view(request, pk):
 
     task.delay(records_number, dataset_path, column_separator,
                string_character, fieldnames, fieldtypes, dataset.id)
-
     return HttpResponseRedirect(reverse('schemas:retrieve', args={schema.id}))
 
 
 def download_file_view(request, pk):
-    from django.http import FileResponse, Http404
-    import os
-
     dataset = get_object_or_404(DataSet, pk=pk)
     schema = dataset.schema
     dataset_sequence_number = dataset.sequence_number
-    file_path = get_dataset_path(schema.user.username, schema.name, dataset_sequence_number)
+    file_path = get_dataset_path(
+        schema.user.username,
+        schema.name,
+        dataset_sequence_number
+    )
     if os.path.exists(file_path):
         with open(file_path, 'r') as fh:
             response = FileResponse(fh.read(), as_attachment=True)
-            response['Content-Disposition'] = 'attachment; filename=' + os.path.basename(file_path)
+            response['Content-Disposition'] = (
+                'attachment; filename=' + os.path.basename(file_path)
+            )
             return response
     raise Http404
