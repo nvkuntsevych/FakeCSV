@@ -7,7 +7,7 @@ from django.views.generic import ListView, DeleteView
 
 from schemas.forms import SchemaForm, ColumnCreateFormSet, ColumnUpdateFormSet
 from schemas.models import Schema, Column, DataSet
-from schemas.utils import get_schema_path, get_fieldnames, get_fieldtypes
+from schemas.utils import get_dataset_path, get_fieldnames, get_fieldtypes
 from schemas.tasks import task
 
 
@@ -113,20 +113,19 @@ def generate_file_view(request, pk):
     )
 
     records_number = int(request.POST['records_number'])
-    schema_path = get_schema_path(schema.user.username, schema.name, dataset_sequence_number)
+    dataset_path = get_dataset_path(schema.user.username, schema.name, dataset_sequence_number)
     column_separator = schema.column_separator
     string_character = schema.string_character
     fieldnames = get_fieldnames(schema)
     fieldtypes = get_fieldtypes(schema)
 
-    dataset.path = schema_path
+    dataset.path = dataset_path
     dataset.save()
 
-    task.delay(records_number, schema_path, column_separator,
+    task.delay(records_number, dataset_path, column_separator,
                string_character, fieldnames, fieldtypes, dataset.id)
 
     return HttpResponseRedirect(reverse('schemas:retrieve', args={schema.id}))
-
 
 
 def download_file_view(request, pk):
@@ -136,7 +135,7 @@ def download_file_view(request, pk):
     dataset = get_object_or_404(DataSet, pk=pk)
     schema = dataset.schema
     dataset_sequence_number = dataset.sequence_number
-    file_path = get_schema_path(schema.user.username, schema.name, dataset_sequence_number)
+    file_path = get_dataset_path(schema.user.username, schema.name, dataset_sequence_number)
     if os.path.exists(file_path):
         with open(file_path, 'r') as fh:
             response = FileResponse(fh.read(), as_attachment=True)
