@@ -11,7 +11,7 @@ Data sets
     <div>{{ column }}</div>
     {% endfor %}
 
-    <!--AJAX-requests------------------------->
+    <!--AJAX-requests-->
     <form method="POST" id="generate-form" action="{% url 'schemas:generate' schema.id %}">
         {% csrf_token %}
         <input name="records_number" type="text">
@@ -40,7 +40,16 @@ Data sets
             });
         });
     </script>     
-    <!--------------------------->
+    <!---->
+
+    <!--page-reloading-->
+    <script>  
+        $(document).ready(function() {
+            setInterval(function() {
+            }, 30000);
+        });
+    </script>
+    <!---->
 
     {% for dataset in datasets %}
         {{ dataset.path }}
